@@ -1,10 +1,18 @@
 import { CronJob } from "cron";
 import cheerio from "cheerio";
 import puppeteer from "puppeteer";
+import PromotionService from '@services/Promotion';
 
 const url = "https://twitter.com/carlsjrhn";
 
-export const job = new CronJob("0 */2 * * * *", function() {
+
+
+export const job = new CronJob("0 */1 * * * *", function() {
+  PromotionService.all()
+  .then(promotions => {
+    console.log(promotions);
+  });
+
   //every two minutes
   puppeteer
     .launch()
