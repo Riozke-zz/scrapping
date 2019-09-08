@@ -4,7 +4,8 @@ import puppeteer from "puppeteer";
 
 const url = "https://twitter.com/carlsjrhn";
 
-export const job = new CronJob("0 */2 * * * *", function() { //every one minute
+export const job = new CronJob("0 */2 * * * *", function() {
+  //every two minutes
   puppeteer
     .launch()
     .then(browser => browser.newPage())
@@ -14,9 +15,13 @@ export const job = new CronJob("0 */2 * * * *", function() { //every one minute
       });
     })
     .then(html => {
-      const $ = cheerio.load(html);
+      const $: CheerioStatic = cheerio.load(html);
       // const elements = [];
-      // $(".tweet>.content>.js-tweet-text-container>.tweet-text").length;
+      console.log(
+        `Found ${
+          $(".tweet>.content>.js-tweet-text-container>.tweet-text").length
+        } tweets at the moment!`
+      );
     })
     .catch(console.error);
 });
