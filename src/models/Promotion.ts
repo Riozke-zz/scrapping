@@ -1,5 +1,5 @@
 
 export default interface Promotion {
-  id: number;
+  id: string;
   content: String;
 }

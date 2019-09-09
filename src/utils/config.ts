@@ -4,13 +4,13 @@ dotenv.config();
 let path;
 switch (process.env.NODE_ENV) {
   case "test":
-    path = `@root/.env`;
+    path = `.env.test`;
     break;
   case "production":
-    path = `@root/.env.production`;
+    path = `.env.production`;
     break;
   default:
-    path = `@root/.env.development`;
+    path = `.env.development`;
 }
 dotenv.config({ path: path });
 

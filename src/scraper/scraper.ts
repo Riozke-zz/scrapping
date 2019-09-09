@@ -1,35 +1,44 @@
 import { CronJob } from "cron";
 import cheerio from "cheerio";
 import puppeteer from "puppeteer";
-import PromotionService from '@services/Promotion';
+import SiteService from "@services/Site";
+import Site from "@models/Site";
+import { AxiosError } from "axios";
+import logger from "@utils/logger";
 
-const url = "https://twitter.com/carlsjrhn";
+export const job = new CronJob("0 */1 * * * *", function onTick() {
+  logger.info(`Starting job at ${Date()}`);
+  SiteService.all()
+    .then((sites: Site[]) => {
+      if (sites.length === 0) {
+        logger.info("No site found! Exiting current Job.");
+        return;
+      }
 
-
-
-export const job = new CronJob("0 */1 * * * *", function() {
-  PromotionService.all()
-  .then(promotions => {
-    console.log(promotions);
-  });
-
-  //every two minutes
-  puppeteer
-    .launch()
-    .then(browser => browser.newPage())
-    .then(page => {
-      return page.goto(url).then(function() {
-        return page.content();
+      sites.forEach((site: Site) => {
+        puppeteer
+          .launch()
+          .then(browser => browser.newPage())
+          .then(page => {
+            return page.goto(site.url).then(function() {
+              return page.content();
+            });
+          })
+          .then(html => {
+            const $: CheerioStatic = cheerio.load(html);
+            console.log(
+              `Found ${$(site.selector).length} matches for site ${site.name}`
+            );
+          })
+          .catch((err: any) => {
+            logger.error(
+              `Error fetching data for site ${site.name}`,
+              err.message
+            );
+          });
       });
     })
-    .then(html => {
-      const $: CheerioStatic = cheerio.load(html);
-      // const elements = [];
-      console.log(
-        `Found ${
-          $(".tweet>.content>.js-tweet-text-container>.tweet-text").length
-        } tweets at the moment!`
-      );
-    })
-    .catch(console.error);
+    .catch((err: AxiosError) => {
+      logger.error("Error fetching sites! Message:", err.message);
+    });
 });
